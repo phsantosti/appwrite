@@ -96,11 +96,23 @@ function dispatch(Server $server, int $fd, int $type, $data = null): int
 
         // Sync executions are considered risky
         $risky = false;
+
+        $domainFunctions = (string)System::getEnv('_APP_DOMAIN_FUNCTIONS', '');
+
+        // if (str_starts_with($request, 'POST') && str_contains($request, '/executions')) {
+        //     $risky = true;
+        // } elseif (str_ends_with($domain, System::getEnv('_APP_DOMAIN_FUNCTIONS'))) {
+        //     $risky = true;
+        // } elseif ($domains->get(md5($domain), 'value') === 1) {
+        //     // executions request coming from custom domain
+        //     $risky = true;
+        // }
+
         if (str_starts_with($request, 'POST') && str_contains($request, '/executions')) {
             $risky = true;
-        } elseif (str_ends_with($domain, System::getEnv('_APP_DOMAIN_FUNCTIONS'))) {
+        } elseif (!empty($domain) && !empty($domainFunctions) && str_ends_with($domain, $domainFunctions)) {
             $risky = true;
-        } elseif ($domains->get(md5($domain), 'value') === 1) {
+        } elseif (!empty($domain) && $domains->get(md5($domain), 'value') === 1) {
             // executions request coming from custom domain
             $risky = true;
         }
